@@ -2,10 +2,14 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import javax.sound.sampled.*;
+import java.io.File;
+import java.io.IOException;
 
 public class Window {
     JFrame frame;
     int lastMsg;
+    int quantMsg;
     Window(JFrame frame){
         this.frame = frame;
         frame.setSize(400, 800);
@@ -52,7 +56,46 @@ public class Window {
                 String mensagem = campoMsg.getText();
                 BalaoMsg(mensagem, 0);
                 campoMsg.setText("");
+                try{
+                    File soundFile = new File("enviada.wav");
+                    AudioInputStream audioIn = AudioSystem.getAudioInputStream(soundFile);
+                    Clip clip = AudioSystem.getClip();
+                    clip.open(audioIn);
+                    clip.start();
+                } catch (UnsupportedAudioFileException | IOException | LineUnavailableException ev){
+                    ev.printStackTrace();
+                }
+                ReceberMsg();
             }
         });
+    }
+
+    void ReceberMsg(){
+        String msg;
+        if (quantMsg == 0){
+            msg = "Olá, tudo bem?";
+        } else if (quantMsg == 1) {
+            msg = "Que bom, também estou bem!";
+        } else {
+            msg = "Entendi, conte me mais";
+        }
+        quantMsg++;
+        Timer timer = new Timer(2000, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e){
+                BalaoMsg(msg, 1);    
+                try{
+                    File soundFile = new File("notificacao.wav");
+                    AudioInputStream audioIn = AudioSystem.getAudioInputStream(soundFile);
+                    Clip clip = AudioSystem.getClip();
+                    clip.open(audioIn);
+                    clip.start();
+                } catch (UnsupportedAudioFileException | IOException | LineUnavailableException ev){
+                    ev.printStackTrace();
+                }
+            }
+        });
+        timer.setRepeats(false);
+        timer.start();
     }
 }
